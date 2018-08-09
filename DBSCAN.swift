@@ -21,7 +21,7 @@ class DBSCAN {
 
     private var locations: [CLLocation]
 
-    private var eps: Double = 0.075
+    private var radius: Double = 0.075
     private var requiredNeighbours: Int = 1
 
     private var clusters: [[Int]] = []
@@ -38,7 +38,7 @@ class DBSCAN {
             if i == locationIndex {
                 continue
             }
-            if location.distance(from: locations[i]) <= eps {
+            if location.distance(from: locations[i]) <= radius {
                 neighbours.append(i)
             }
         }
@@ -67,9 +67,9 @@ class DBSCAN {
         }
     }
 
-    func findCluster(maximumDistance: Double, memberCount: Int) -> ([Int], [Cluster]) {
-        eps = maximumDistance
-        requiredNeighbours = memberCount - 1
+    func findCluster(eps: Double, minPts: Int) -> ([Int], [Cluster]) {
+        radius = eps
+        requiredNeighbours = minPts
 
         clusters = []
         status = Array(repeating:-1, count: locations.count)
