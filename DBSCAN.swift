@@ -25,7 +25,7 @@ class DBSCAN {
     private var requiredNeighbours: Int = 1
 
     private var clusters: [[Int]] = []
-    private var status: [Int] = []
+    private var sequence: [Int] = []
 
     init(_ locations: [CLLocation]) {
         self.locations = locations
@@ -48,20 +48,20 @@ class DBSCAN {
 
     private func expandCluster(locationIndex: Int, neighbours: [Int], clusterIndex: Int) {
         clusters[clusterIndex - 1].append(locationIndex)
-        status[locationIndex] = clusterIndex
+        sequence[locationIndex] = clusterIndex
 
         for i in 0..<neighbours.count {
             let currentLocationIndex = neighbours[i]
-            if status[currentLocationIndex] == -1 {
-                status[currentLocationIndex] = 0
+            if sequence[currentLocationIndex] == -1 {
+                sequence[currentLocationIndex] = 0
                 let currentNeighbours = getRegionNeighbours(currentLocationIndex)
                 if currentNeighbours.count >= requiredNeighbours {
                     expandCluster(locationIndex: currentLocationIndex, neighbours: currentNeighbours, clusterIndex: clusterIndex)
                 }
             }
 
-            if status[currentLocationIndex] <= 0 {
-                status[currentLocationIndex] = clusterIndex
+            if sequence[currentLocationIndex] <= 0 {
+                sequence[currentLocationIndex] = clusterIndex
                 clusters[clusterIndex - 1].append(currentLocationIndex)
             }
         }
@@ -72,14 +72,14 @@ class DBSCAN {
         requiredNeighbours = minPts
 
         clusters = []
-        status = Array(repeating:-1, count: locations.count)
+        sequence = Array(repeating:-1, count: locations.count)
 
         for i in 0..<locations.count {
-            if status[i] == -1 {
-                status[i] = 0
+            if sequence[i] == -1 {
+                sequence[i] = 0
                 let neighbours = getRegionNeighbours(i)
                 if neighbours.count < requiredNeighbours {
-                    status[i] = 0
+                    sequence[i] = 0
                 } else {
                     clusters.append([])
                     let clusterIndex = clusters.count
@@ -88,7 +88,7 @@ class DBSCAN {
             }
         }
 
-        var centroids: [Cluster] = []
+        var places: [Cluster] = []
         for i in 0..<clusters.count {
             var latitude = 0.0, longitude = 0.0, accuracy = 0.0
             for j in 0..<clusters[i].count {
@@ -105,12 +105,17 @@ class DBSCAN {
             let location = CLLocation(coordinate: CLLocationCoordinate2D(latitude: latitude, longitude: longitude), altitude: 0, horizontalAccuracy: accuracy, verticalAccuracy: 0, timestamp: Date())
             let members = clusters[i]
 
-            centroids.append(Cluster(location: location, members: members))
+            places.append(Cluster(location: location, members: members))
 
 
         }
+        
+        // reduce index, so that -1 is noice and sequence references directly to places array index
+        for i in 0..<sequence.count {
+            sequence[i] -= 1
+        }
 
-        return (status, centroids)
+        return (sequence, places)
     }
 
 
