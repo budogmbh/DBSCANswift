@@ -33,10 +33,10 @@ locations.append(CLLocation(latitude: 48.1603, longitude: 11.5763))
 
 ```swift
 let dbscan = DBSCAN(locations)
-let (mapping, centroids) = dbscan.findCluster(eps: 75.0, minPts: 0)
+let (sequence, places) = dbscan.findCluster(eps: 75.0, minPts: 0)
 ```
 
 - `eps` as neighbourhood radius defined in meters
 - `minPts` as minimum neighbours to consider a point as core point
-- `mapping` contains a list of cluster index for each provided location
-- `centroids` contains the center locations of each cluster and a index reference to the contained locations
+- `sequence` contains a list of cluster index for each provided location
+- `places` contains the center locations of each cluster and a index reference to the member locations
